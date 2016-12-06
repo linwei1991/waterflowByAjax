@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ajax</title>
+    <style>
+      *{
+          margin:0;
+          padding:0;
+      }
+        ul#ul1{
+           width:1080px;
+            margin:100px auto;
+        }
+        li{
+            list-style:none;
+            float:left;
+            width:247px;
+           margin-right:10px;
+        }
+        li div{
+           border:1px solid black;
+            padding:10px;
+            margin-bottom:10px;
+        }
+        li div img{
+            width:225px;
+            display:block;
+        }
+    </style>
+    <script src="ajax2.js"></script>
+    <script>
+        window.onload=function(){
+            var oUl=document.getElementById('ul1');
+            var oLi=oUl.getElementsByTagName('li');
+            var ilen=oLi.length;
+            var iPage=1;
+               function getList(){
+                   ajax('get','getPics.php','cpage='+ipage,function(data){
+                       var data=JSON.parse(data);
+                       if(!data.length){
+                           return;
+                       }
+                       for(var i=0;i<data.length;i++){
+                           //获得最短的一个li
+                           var _index=getShot();
+                           var oDiv=document.createElement('div');
+                           var oImg=document.createElement('img');
+                           oImg.src=data[i].preview;
+                           oImg.style.width='225px';
+                           oImg.style.height=data[i].height*(225/data[i].width);
+                           oDiv.appendChild(oImg);
+                           var oP=document.createElement('p');
+                           oP.innerHTML=data[i].title;
+                           oDiv.appendChild(oP);
+                           oLi[_index].appendChild(oDiv);
+
+                       }
+                       b=true;
+                   });
+
+               }
+
+
+            window.onscroll=function(){
+                var _index=getShot();
+                var aLi=oLi[_index];
+                var scrollTop=document.documentElement.scrollTop||document.body.scrollTop;
+                if(getTop(aLi)+aLi.offsetHeight<document.documentElement.clientHeight+scrollTop){
+                    if(b){  //每次加载一页
+                        b=false;  //进来马上设置为false,防止无限制加载
+                        getList();
+                        ipage++;
+                    }
+                }
+            }
+            function getTop(obj){
+                var iTop=0;
+                while(obj){
+                    iTop+=obj.offsetTop;    //目的是为了获得li的top
+                    obj=obj.offsetParent;
+                }
+                return iTop;
+            }
+            function getShot(){
+                var index=0;
+                var ih=oLi[index].offsetHeight;
+                for(var i=1;i<ilen;i++){
+                    if(ih>oLi[i].offsetHeight){
+                        index=i;
+                        ih=oLi[i].offsetHeight;
+                    }
+                }
+                return index;
+            }
+        }
+    </script>
+</head>
+<body>
+   <ul id="ul1">
+       <li></li>
+       <li></li>
+       <li></li>
+       <li></li>
+   </ul>
+</body>
+</html>
